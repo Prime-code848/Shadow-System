@@ -1,259 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shadow System - Levelling Up Strong</title>
-  <style>
-    :root { --bg: #0a0a0a; --accent: #00ff9d; --text: #e0e0e0; }
-    body {
-      margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--text); min-height: 100vh;
-    }
-    .container { max-width: 920px; margin: 0 auto; }
-    h1 { color: var(--accent); text-align: center; margin-bottom: 10px; }
-    .level { text-align: center; font-size: 2.2rem; margin: 10px 0; }
-    .progress-bar { height: 12px; background: #333; border-radius: 6px; overflow: hidden; margin: 15px 0; }
-    .progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.6s ease; }
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 30px 0; }
-    .stat { background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; }
-    .stat-name { color: var(--accent); font-size: 0.9rem; }
-    .stat-value { font-size: 1.8rem; font-weight: bold; }
-    .quests { background: #1a1a1a; padding: 20px; border-radius: 8px; border: 1px solid #333; margin-bottom: 25px; }
-    .quest-item { padding: 12px; background: #222; margin-bottom: 10px; border-radius: 6px; display: flex; align-items: center; gap: 12px; }
-    button {
-      background: var(--accent); color: black; border: none; padding: 12px 24px;
-      border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px;
-    }
-    button:hover { background: #00cc7a; }
-    .reset-btn { background: #444; color: white; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Ascendant Protocol</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(#0a0a1f, #000011); color: #a0d8ff; margin: 0; padding: 20px; }
+        h1 { text-align: center; color: #00b3ff; text-shadow: 0 0 10px #00b3ff; }
+        .container { max-width: 900px; margin: auto; }
+        .status { background: #0f1626; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #003366; }
+        .stat { margin: 15px 0; }
+        .progress { height: 22px; background: #112233; border-radius: 10px; overflow: hidden; border: 1px solid #003366; }
+        .bar { height: 100%; background: linear-gradient(to right, #00b3ff, #0088cc); }
+        button { background: #003366; color: #a0d8ff; border: 1px solid #00b3ff; padding: 10px 16px; margin: 6px; cursor: pointer; border-radius: 6px; }
+        button:hover { background: #006699; }
+        .quest { margin: 12px 0; padding: 12px; background: #0f1626; border-radius: 8px; border-left: 4px solid #00b3ff; }
+        .log { height: 200px; overflow-y: auto; background: #0a0f1f; padding: 12px; border-radius: 8px; border: 1px solid #003366; }
+        textarea { width: 100%; height: 80px; background: #0a0f1f; color: #a0d8ff; border: 1px solid #003366; }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>SHADOW SYSTEM</h1>
-    <div class="level">Level <span id="level">200</span></div>
-    <div>Progress: <span id="progress-text">0</span>/100</div>
-    <div class="progress-bar"><div id="progress-bar" class="progress"></div></div>
-
-    <div class="stats" id="stats-container"></div>
-
-    <h2 style="color: var(--accent);">Daily Quests</h2>
-    <div class="quests" id="quests-container"></div>
-
-    <h2 style="color: var(--accent);">Weekly Quest</h2>
-    <div class="quests" id="weekly-container"></div>
-
-    <button onclick="completeDay()">Complete Daily Quests & Save</button>
-    <button onclick="completeWeekly()" style="margin-left:10px;">Claim Weekly Quest</button>
-    <button class="reset-btn" onclick="resetProgress()" style="margin-left:10px;">Reset All Progress</button>
-
-    <p style="text-align:center; margin-top:30px; font-size:0.9rem; color:#666;">
-      Quests now persist correctly. Host on GitHub Pages for access anywhere.
-    </p>
-  </div>
-
-  <script>
-    let player = {
-      level: 200,
-      progress: 0,
-      stats: {
-        Programming: 10,
-        "Hacking & Cybersecurity": 10,
-        "Trading & Financial Intelligence": 10,
-        "Self-Development": 10
-      },
-      dailyQuests: [
-        { id: 1, text: "Programming: 45+ minutes focused coding / project work", completed: false },
-        { id: 2, text: "Hacking: 30+ minutes study or practical exercise", completed: false },
-        { id: 3, text: "Trading: Review charts + journal one trade idea or lesson", completed: false }
-      ],
-      currentSelfQuests: [],
-      selfDevPool: [
-        "Mental/Cognitive: Read 1 chapter of a technical or non-fiction book",
-        "Mental/Cognitive: Solve one LeetCode / algorithm problem",
-        "Mental/Cognitive: Learn one new concept (e.g., design pattern, probability)",
-        "Emotional: 10+ minutes meditation or breathing exercise",
-        "Emotional: Gratitude journaling (3 things)",
-        "Emotional: Review one past failure and extract a lesson",
-        "Spiritual: Read Bible or spiritual text for 15 minutes",
-        "Spiritual: Listen to a sermon/podcast and reflect",
-        "Spiritual: Practice prayer or mindful reflection",
-        "Character: Practice discipline (no distractions during focus blocks)",
-        "Character: Act with integrity in one decision today",
-        "Character: Show patience in a challenging situation",
-        "Social: Reach out to one contact or network meaningfully",
-        "Social: Share one valuable insight publicly (LinkedIn/X)",
-        "Social: Practice active listening in a conversation",
-        "Skill: Play one focused game of Chess and analyse it",
-        "Skill: Practice public speaking (record 2-minute talk)",
-        "Skill: Work on a personal portfolio or side project"
-      ],
-      weeklyQuest: { text: "Complete 5+ daily quests for at least 5 days this week + finish one major milestone (e.g. coding module or trading backtest)", completed: false }
-    };
-
-    function saveData() {
-      localStorage.setItem('shadowSystem', JSON.stringify(player));
-    }
-
-    function loadData() {
-      const saved = localStorage.getItem('shadowSystem');
-      if (saved) player = JSON.parse(saved);
-    }
-
-    function generateNewSelfQuests() {
-      const shuffled = [...player.selfDevPool].sort(() => 0.5 - Math.random());
-      player.currentSelfQuests = shuffled.slice(0, 5).map((text, idx) => ({
-        id: 100 + idx,
-        text: text,
-        completed: false
-      }));
-    }
-
-    function renderStats() {
-      const container = document.getElementById('stats-container');
-      container.innerHTML = '';
-      Object.keys(player.stats).forEach(stat => {
-        const div = document.createElement('div');
-        div.className = 'stat';
-        div.innerHTML = `<div class="stat-name">${stat}</div><div class="stat-value">${player.stats[stat]}</div>`;
-        container.appendChild(div);
-      });
-    }
-
-    function renderQuests() {
-      const container = document.getElementById('quests-container');
-      container.innerHTML = '';
-
-      // Fixed Daily Quests
-      player.dailyQuests.forEach((quest, index) => {
-        const div = document.createElement('div');
-        div.className = 'quest-item';
-        div.innerHTML = `<input type="checkbox" ${quest.completed ? 'checked' : ''} onchange="toggleQuest(${index}, 'daily')"> <span>${quest.text}</span>`;
-        container.appendChild(div);
-      });
-
-      // Self-Development Quests
-      if (player.currentSelfQuests.length === 0) {
-        generateNewSelfQuests();
-      }
-
-      player.currentSelfQuests.forEach((quest, idx) => {
-        const div = document.createElement('div');
-        div.className = 'quest-item';
-        div.innerHTML = `<input type="checkbox" ${quest.completed ? 'checked' : ''} onchange="toggleSelfQuest(${idx})"> <span>${quest.text}</span>`;
-        container.appendChild(div);
-      });
-    }
-
-    function toggleQuest(index, type) {
-      if (type === 'daily') player.dailyQuests[index].completed = !player.dailyQuests[index].completed;
-      saveData();
-    }
-
-    function toggleSelfQuest(idx) {
-      player.currentSelfQuests[idx].completed = !player.currentSelfQuests[idx].completed;
-      saveData();
-    }
-
-    function renderWeekly() {
-      const container = document.getElementById('weekly-container');
-      container.innerHTML = `
-        <div class="quest-item">
-          <input type="checkbox" ${player.weeklyQuest.completed ? 'checked' : ''} onchange="toggleWeekly()">
-          <span>${player.weeklyQuest.text}</span>
+    <div class="container">
+        <h1>Shadow Ascendant Protocol</h1>
+        
+        <div class="status">
+            <p><strong>Overall Level:</strong> <span id="level">1</span> | <strong>Title:</strong> <span id="title">Shadow Novice</span></p>
+            <p><strong>Total Shadow Score:</strong> <span id="totalScore">0</span> (Year-End Culmination)</p>
+            
+            <h3>Health & Mana</h3>
+            <div class="stat">Health <div class="progress"><div id="healthBar" class="bar" style="width:100%"></div></div></div>
+            <div class="stat">Mana <div class="progress"><div id="manaBar" class="bar" style="width:100%"></div></div></div>
         </div>
-      `;
-    }
 
-    function toggleWeekly() {
-      player.weeklyQuest.completed = !player.weeklyQuest.completed;
-      saveData();
-    }
+        <h2>Core Stats (Available Points: <span id="statPoints">5</span>)</h2>
+        <div id="stats"></div>
+        <button onclick="allocatePoint('all')">+1 to All Stats</button>
 
-    function completeDay() {
-      let completedCount = player.dailyQuests.filter(q => q.completed).length;
-      completedCount += player.currentSelfQuests.filter(q => q.completed).length;
+        <h2>Daily Quests - <span id="currentDate"></span></h2>
+        <div id="quests"></div>
+        
+        <button onclick="completeAllQuests()">Complete All Daily Quests</button>
+        <button onclick="resetToday()">Reset Today's Progress</button>
+        <button onclick="exportData()">Export Progress</button>
+        <button onclick="importData()">Import Progress</button>
 
-      if (completedCount === 0) {
-        alert("Sir, please complete at least one quest before claiming progress.");
-        return;
-      }
+        <h2>Shadow Log</h2>
+        <textarea id="logEntry" placeholder="What improved in the shadows today?"></textarea>
+        <button onclick="addLogEntry()">Record Entry</button>
+        <div id="log" class="log"></div>
+    </div>
 
-      const pointsEarned = completedCount * 12;
-      player.progress += pointsEarned;
+    <script>
+        let player = {
+            level: 1,
+            title: "Shadow Novice",
+            totalScore: 0,
+            health: 100,
+            mana: 100,
+            statPoints: 5,
+            stats: {
+                Programming: { value: 1, exp: 0 },
+                Hacking: { value: 1, exp: 0 },
+                Trading: { value: 1, exp: 0 },
+                Knowledge: { value: 1, exp: 0 },
+                Discipline: { value: 1, exp: 0 },
+                Spiritual: { value: 1, exp: 0 }
+            },
+            lastDate: "",
+            completedQuests: [],
+            log: []
+        };
 
-      if (player.progress >= 100) {
-        const levelsGained = Math.floor(player.progress / 100);
-        player.level += levelsGained;
-        player.progress %= 100;
+        const titles = ["Shadow Novice", "Shadow Walker", "Shadow Caster", "Shadow Weaver", "Shadow Sovereign"];
 
-        const statKeys = Object.keys(player.stats);
-        for (let i = 0; i < 5; i++) {
-          const randStat = statKeys[Math.floor(Math.random() * statKeys.length)];
-          player.stats[randStat] += 1;
+        const quests = [
+            "1 hour Programming practice",
+            "30 min Ethical Hacking study",
+            "30 min Trading analysis or journal",
+            "Read & extract 10 pages from success/spiritual book",
+            "20 min Spiritual practice (prayer/reflection)",
+            "Maintain good sleep & focus"
+        ];
+
+        function saveData() { localStorage.setItem('shadowSystem', JSON.stringify(player)); }
+        function loadData() {
+            const saved = localStorage.getItem('shadowSystem');
+            if (saved) player = JSON.parse(saved);
         }
-      }
 
-      alert(`Well done, Sir. You earned ${pointsEarned} Progress Points.`);
+        function getToday() { return new Date().toISOString().split('T')[0]; }
 
-      // Reset daily quests
-      player.dailyQuests.forEach(q => q.completed = false);
-      player.currentSelfQuests.forEach(q => q.completed = false);
-
-      // Generate fresh self-development quests for next day
-      generateNewSelfQuests();
-
-      saveData();
-      updateUI();
-    }
-
-    function completeWeekly() {
-      if (!player.weeklyQuest.completed) {
-        alert("Sir, please mark the weekly quest as completed first.");
-        return;
-      }
-
-      player.progress += 60;
-
-      if (player.progress >= 100) {
-        const levelsGained = Math.floor(player.progress / 100);
-        player.level += levelsGained;
-        player.progress %= 100;
-
-        const statKeys = Object.keys(player.stats);
-        for (let i = 0; i < 7; i++) {
-          const randStat = statKeys[Math.floor(Math.random() * statKeys.length)];
-          player.stats[randStat] += 1;
+        function checkDateReset() {
+            const today = getToday();
+            if (player.lastDate !== today) {
+                player.completedQuests = [];
+                player.lastDate = today;
+                saveData();
+            }
         }
-      }
 
-      alert("Outstanding achievement, Sir. +60 Progress Points awarded for the weekly quest.");
+        function updateTitle() {
+            const tier = Math.min(Math.floor((player.level - 1) / 50), titles.length - 1);
+            player.title = titles[tier];
+        }
 
-      player.weeklyQuest.completed = false;
-      saveData();
-      updateUI();
-    }
+        function renderStatus() {
+            document.getElementById('level').textContent = player.level;
+            document.getElementById('title').textContent = player.title;
+            document.getElementById('totalScore').textContent = player.totalScore;
+            document.getElementById('healthBar').style.width = player.health + '%';
+            document.getElementById('manaBar').style.width = player.mana + '%';
+            document.getElementById('statPoints').textContent = player.statPoints;
+        }
 
-    function updateUI() {
-      document.getElementById('level').textContent = player.level;
-      document.getElementById('progress-text').textContent = player.progress;
-      document.getElementById('progress-bar').style.width = `${player.progress}%`;
-      renderStats();
-      renderQuests();
-      renderWeekly();
-    }
+        function renderStats() {
+            const container = document.getElementById('stats');
+            container.innerHTML = '';
+            Object.keys(player.stats).forEach(stat => {
+                const data = player.stats[stat];
+                const html = `
+                    <div class="stat">
+                        <strong>${stat}</strong> (Lv ${data.value}) 
+                        <button onclick="allocatePoint('${stat}')">+1</button>
+                        <div class="progress"><div class="bar" style="width:${Math.min(100, data.exp)}%"></div></div>
+                    </div>`;
+                container.innerHTML += html;
+            });
+        }
 
-    function resetProgress() {
-      if (confirm("Reset all progress, Sir? This cannot be undone.")) {
-        localStorage.removeItem('shadowSystem');
-        location.reload();
-      }
-    }
+        function allocatePoint(stat) {
+            if (player.statPoints <= 0) return;
+            if (stat === 'all') {
+                Object.keys(player.stats).forEach(s => player.stats[s].value += 1);
+            } else {
+                player.stats[stat].value += 1;
+            }
+            player.statPoints--;
+            player.totalScore += 10;
+            saveData();
+            renderStatus();
+            renderStats();
+        }
 
-    // Initialize
-    loadData();
-    updateUI();
-  </script>
+        function renderQuests() {
+            checkDateReset();
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
+            const container = document.getElementById('quests');
+            container.innerHTML = '';
+            quests.forEach((q, i) => {
+                const checked = player.completedQuests.includes(i) ? 'checked' : '';
+                container.innerHTML += `<div class="quest"><input type="checkbox" ${checked} onchange="toggleQuest(${i})"> ${q}</div>`;
+            });
+        }
+
+        function toggleQuest(index) {
+            if (!player.completedQuests.includes(index)) {
+                player.completedQuests.push(index);
+                const statKeys = Object.keys(player.stats);
+                const relevantStat = statKeys[index % statKeys.length];
+                player.stats[relevantStat].exp += 15;
+                if (player.stats[relevantStat].exp >= 100) {
+                    player.stats[relevantStat].exp = 0;
+                    player.stats[relevantStat].value += 1;
+                    player.statPoints += 1;
+                }
+                player.totalScore += 25;
+                player.level = Math.floor(player.totalScore / 200) + 1;
+                updateTitle();
+                saveData();
+                renderStatus();
+                renderStats();
+            }
+        }
+
+        function completeAllQuests() {
+            player.completedQuests = quests.map((_, i) => i);
+            Object.keys(player.stats).forEach(stat => {
+                player.stats[stat].exp += 25;
+                if (player.stats[stat].exp >= 100) {
+                    player.stats[stat].exp -= 100;
+                    player.stats[stat].value += 1;
+                    player.statPoints += 1;
+                }
+            });
+            player.totalScore += 200;
+            player.level = Math.floor(player.totalScore / 200) + 1;
+            updateTitle();
+            saveData();
+            renderStatus();
+            renderStats();
+            renderQuests();
+        }
+
+        function resetToday() {
+            player.completedQuests = [];
+            saveData();
+            renderQuests();
+        }
+
+        function addLogEntry() {
+            const entry = document.getElementById('logEntry').value.trim();
+            if (entry) {
+                player.log.unshift(new Date().toLocaleDateString() + ": " + entry);
+                if (player.log.length > 30) player.log.pop();
+                document.getElementById('logEntry').value = '';
+                saveData();
+                renderLog();
+            }
+        }
+
+        function renderLog() {
+            document.getElementById('log').innerHTML = player.log.join('<br><br>');
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(player, null, 2);
+            const blob = new Blob([dataStr], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'shadow_progress.json';
+            a.click();
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    player = JSON.parse(ev.target.result);
+                    saveData();
+                    renderStatus();
+                    renderStats();
+                    renderQuests();
+                    renderLog();
+                };
+                reader.readAsText(e.target.files[0]);
+            };
+            input.click();
+        }
+
+        // Initialize
+        loadData();
+        renderStatus();
+        renderStats();
+        renderQuests();
+        renderLog();
+    </script>
 </body>
 </html>
